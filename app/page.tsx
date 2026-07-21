@@ -1,101 +1,193 @@
-import Image from "next/image";
+'use client'
+
+import { useState } from 'react'
+import dynamic from 'next/dynamic'
+import { parse } from 'papaparse'
+import { computeStoreAnalytics, type SalesRow, type StoreAnalytics } from '@/lib/analytics'
+import type { StoreWeather } from '@/lib/weather'
+import UploadSection        from '@/components/UploadSection'
+import CorrelationBadges    from '@/components/CorrelationBadges'
+import WeatherScatterCharts from '@/components/WeatherScatterCharts'
+import DowBarChart          from '@/components/DowBarChart'
+import SalesTimeline        from '@/components/SalesTimeline'
+import ReportSection        from '@/components/ReportSection'
+
+// Leaflet is browser-only — must be dynamically imported with ssr: false
+const StoreMap = dynamic(() => import('@/components/StoreMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[380px] bg-slate-100 animate-pulse rounded-xl flex items-center justify-center text-slate-400 text-sm">
+      지도 로딩 중…
+    </div>
+  ),
+})
+
+// ── CSV parsing ───────────────────────────────────────────────────────────────
+
+interface CsvRow {
+  date: string
+  store_id: string
+  store_name: string
+  lat: string
+  lon: string
+  total_sales: string
+  ice_sales: string
+  hot_sales: string
+  transactions: string
+}
+
+function parseSalesRow(r: CsvRow): SalesRow {
+  return {
+    date:         r.date,
+    storeId:      r.store_id,
+    storeName:    r.store_name,
+    totalSales:   parseInt(r.total_sales),
+    iceSales:     parseInt(r.ice_sales),
+    hotSales:     parseInt(r.hot_sales),
+    transactions: parseInt(r.transactions),
+  }
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [analytics,  setAnalytics]  = useState<StoreAnalytics[] | null>(null)
+  const [weather,    setWeather]    = useState<StoreWeather[]   | null>(null)
+  const [selectedId, setSelectedId] = useState('gangnam')
+  const [loading,    setLoading]    = useState(false)
+  const [error,      setError]      = useState<string | null>(null)
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  async function processData(csvText: string) {
+    setLoading(true)
+    setError(null)
+    try {
+      // 1. Parse CSV
+      const { data, errors } = parse<CsvRow>(csvText, { header: true, skipEmptyLines: true })
+      if (errors.length && data.length === 0)
+        throw new Error('CSV 파싱 실패: ' + errors[0]?.message)
+      const sales = data.map(parseSalesRow)
+
+      // 2. Fetch weather for all stores (server-side file cache TTL 24h / 1h)
+      const wxRes = await fetch('/api/weather')
+      if (!wxRes.ok) throw new Error(`날씨 API 오류: ${wxRes.status}`)
+      const wxData = (await wxRes.json()) as StoreWeather[]
+      setWeather(wxData)
+
+      // 3. Compute analytics client-side (pure math)
+      const result = wxData.map((wx) => {
+        const storeSales = sales.filter((s) => s.storeId === wx.storeId)
+        return computeStoreAnalytics(storeSales, wx.archive)
+      })
+      setAnalytics(result)
+      setSelectedId(result[0]?.storeId ?? 'gangnam')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '데이터 처리 오류')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function loadSample() {
+    const res = await fetch('/sample-data.csv')
+    if (!res.ok) throw new Error('샘플 CSV 로드 실패')
+    await processData(await res.text())
+  }
+
+  const sel   = analytics?.find((a) => a.storeId === selectedId)
+  const selWx = weather?.find((w) => w.storeId === selectedId)
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900">
+      {/* ── Header ─────────────────────────────────────────────────────── */}
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-xl">🌤️</span>
+            <div>
+              <h1 className="text-base font-bold leading-tight">Weather-Driven Ops Copilot</h1>
+              <p className="text-xs text-slate-400">매출 × 기상 상관분석 &amp; 7일 운영 브리핑</p>
+            </div>
+          </div>
+          {analytics && (
+            <button
+              onClick={() => { setAnalytics(null); setWeather(null) }}
+              className="text-xs text-slate-400 hover:text-slate-700 transition"
+            >
+              ↩ 새 파일 업로드
+            </button>
+          )}
         </div>
+      </header>
+
+      {/* ── Main ───────────────────────────────────────────────────────── */}
+      <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+        {!analytics ? (
+          <UploadSection
+            onUpload={processData}
+            onSample={loadSample}
+            loading={loading}
+            error={error}
+          />
+        ) : (
+          <>
+            {/* Row 1: Map + Store Selector */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <StoreMap
+                  analytics={analytics}
+                  selectedId={selectedId}
+                  onSelect={setSelectedId}
+                />
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest">지점 선택</h2>
+                {analytics.map((a) => {
+                  const active = a.storeId === selectedId
+                  return (
+                    <button
+                      key={a.storeId}
+                      onClick={() => setSelectedId(a.storeId)}
+                      className={`w-full text-left px-4 py-3 rounded-xl border transition-all ${
+                        active
+                          ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+                          : 'bg-white border-slate-200 hover:border-blue-300'
+                      }`}
+                    >
+                      <div className="font-semibold text-sm">{a.storeName}</div>
+                      <div className={`text-xs mt-0.5 ${active ? 'text-blue-200' : 'text-slate-400'}`}>
+                        일평균 ₩{a.summary.avgDailySales.toLocaleString()}
+                        &nbsp;·&nbsp;강수 r={a.correlations.salesVsPrecip}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {sel && (
+              <>
+                {/* Row 2: Correlation badges */}
+                <CorrelationBadges correlations={sel.correlations} />
+
+                {/* Row 3: Scatter charts */}
+                <WeatherScatterCharts
+                  scatter={sel.scatter}
+                  correlations={sel.correlations}
+                />
+
+                {/* Row 4: DOW chart + Sales timeline */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <DowBarChart dowEffect={sel.dowEffect} />
+                  <SalesTimeline scatter={sel.scatter} storeName={sel.storeName} />
+                </div>
+
+                {/* Row 5: GPT report section */}
+                {selWx && <ReportSection analytics={sel} weather={selWx} />}
+              </>
+            )}
+          </>
+        )}
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
-  );
+  )
 }
