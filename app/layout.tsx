@@ -15,7 +15,7 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: 'Weather-Driven Ops Copilot',
-  description: '매장 매출 × 기상 상관분석 & GPT-5.6 운영 브리핑',
+  description: 'Store sales × weather correlation analytics & GPT-5.6 operational briefings',
 };
 
 export default function RootLayout({

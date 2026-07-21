@@ -44,7 +44,7 @@ function ReportCard({
       const data = await res.json() as { content: string }
       setContent(data.content)
     } catch (err) {
-      setError(err instanceof Error ? err.message : '오류 발생')
+      setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
       setLoading(false)
     }
@@ -62,14 +62,14 @@ function ReportCard({
           disabled={loading}
           className={`shrink-0 px-4 py-2 ${btnCls} text-white text-sm rounded-lg disabled:opacity-50 transition-colors`}
         >
-          {loading ? '생성 중…' : '생성'}
+          {loading ? 'Generating…' : 'Generate'}
         </button>
       </div>
 
       {loading && (
         <div className="flex items-center gap-2 text-sm text-slate-400">
           <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
-          GPT-5.6 분석 중…
+          GPT-5.6 analyzing…
         </div>
       )}
 
@@ -85,7 +85,7 @@ function ReportCard({
 
       {!content && !loading && !error && (
         <div className="bg-slate-50 rounded-lg p-6 text-sm text-slate-400 text-center">
-          생성 버튼을 클릭하면 GPT-5.6이 리포트를 작성합니다
+          Click Generate — GPT-5.6 will write the report
         </div>
       )}
     </div>
@@ -95,18 +95,18 @@ function ReportCard({
 export default function ReportSection({ analytics, weather }: Props) {
   return (
     <section className="space-y-4">
-      <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest">GPT-5.6 리포트 생성</h2>
+      <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest">GPT-5.6 Report Generation</h2>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ReportCard
-          title="📊 과거 인사이트 리포트"
-          subtitle="상관분석 기반 3~5개 인사이트 + 액션 플랜"
+          title="📊 Insight Report"
+          subtitle="3–5 data-backed insights + action plan"
           color="blue"
           endpoint="/api/report/insight"
           payload={{ analytics }}
         />
         <ReportCard
-          title="📅 7일 운영 브리핑"
-          subtitle="예보 기반 매출 예측 + 재고 / 인력 / 프로모션 액션"
+          title="📅 7-Day Operational Briefing"
+          subtitle="Forecast-based sales prediction + inventory / staffing / promo actions"
           color="orange"
           endpoint="/api/report/briefing"
           payload={{ analytics, forecast: weather.forecast }}

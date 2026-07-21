@@ -17,7 +17,7 @@ const StoreMap = dynamic(() => import('@/components/StoreMap'), {
   ssr: false,
   loading: () => (
     <div className="h-[380px] bg-slate-100 animate-pulse rounded-xl flex items-center justify-center text-slate-400 text-sm">
-      지도 로딩 중…
+      Loading map…
     </div>
   ),
 })
@@ -64,12 +64,12 @@ export default function Home() {
       // 1. Parse CSV
       const { data, errors } = parse<CsvRow>(csvText, { header: true, skipEmptyLines: true })
       if (errors.length && data.length === 0)
-        throw new Error('CSV 파싱 실패: ' + errors[0]?.message)
+        throw new Error('CSV parse error: ' + errors[0]?.message)
       const sales = data.map(parseSalesRow)
 
       // 2. Fetch weather for all stores (server-side file cache TTL 24h / 1h)
       const wxRes = await fetch('/api/weather')
-      if (!wxRes.ok) throw new Error(`날씨 API 오류: ${wxRes.status}`)
+      if (!wxRes.ok) throw new Error(`Weather API error: ${wxRes.status}`)
       const wxData = (await wxRes.json()) as StoreWeather[]
       setWeather(wxData)
 
@@ -81,7 +81,7 @@ export default function Home() {
       setAnalytics(result)
       setSelectedId(result[0]?.storeId ?? 'gangnam')
     } catch (err) {
-      setError(err instanceof Error ? err.message : '데이터 처리 오류')
+      setError(err instanceof Error ? err.message : 'Data processing error')
     } finally {
       setLoading(false)
     }
@@ -89,7 +89,7 @@ export default function Home() {
 
   async function loadSample() {
     const res = await fetch('/sample-data.csv')
-    if (!res.ok) throw new Error('샘플 CSV 로드 실패')
+    if (!res.ok) throw new Error('Failed to load sample CSV')
     await processData(await res.text())
   }
 
@@ -105,7 +105,7 @@ export default function Home() {
             <span className="text-xl">🌤️</span>
             <div>
               <h1 className="text-base font-bold leading-tight">Weather-Driven Ops Copilot</h1>
-              <p className="text-xs text-slate-400">매출 × 기상 상관분석 &amp; 7일 운영 브리핑</p>
+              <p className="text-xs text-slate-400">Sales × Weather Analytics &amp; 7-Day Briefing</p>
             </div>
           </div>
           {analytics && (
@@ -113,7 +113,7 @@ export default function Home() {
               onClick={() => { setAnalytics(null); setWeather(null) }}
               className="text-xs text-slate-400 hover:text-slate-700 transition"
             >
-              ↩ 새 파일 업로드
+              ↩ Upload new file
             </button>
           )}
         </div>
@@ -140,7 +140,7 @@ export default function Home() {
                 />
               </div>
               <div className="space-y-2">
-                <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest">지점 선택</h2>
+                <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Select Store</h2>
                 {analytics.map((a) => {
                   const active = a.storeId === selectedId
                   return (
@@ -155,8 +155,8 @@ export default function Home() {
                     >
                       <div className="font-semibold text-sm">{a.storeName}</div>
                       <div className={`text-xs mt-0.5 ${active ? 'text-blue-200' : 'text-slate-400'}`}>
-                        일평균 ₩{a.summary.avgDailySales.toLocaleString()}
-                        &nbsp;·&nbsp;강수 r={a.correlations.salesVsPrecip}
+                        Avg ₩{a.summary.avgDailySales.toLocaleString()}
+                        &nbsp;·&nbsp;Precip r={a.correlations.salesVsPrecip}
                       </div>
                     </button>
                   )

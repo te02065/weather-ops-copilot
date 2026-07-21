@@ -6,7 +6,7 @@ import {
 } from 'recharts'
 import type { ScatterPoint, Correlations } from '@/lib/analytics'
 
-const fmtSales = (v: number) => `₩${Math.round(v / 10000)}만`
+const fmtSales = (v: number) => `₩${Math.round(v / 10000)}k`
 const fmtPct   = (v: number) => `${(v * 100).toFixed(1)}%`
 
 interface TooltipPayload { x: number; y: number }
@@ -25,7 +25,7 @@ function CustomTooltip({
   return (
     <div className="bg-white border border-slate-200 shadow rounded-lg px-3 py-2 text-xs">
       <p className="text-slate-500">{xLabel}: <span className="font-semibold text-slate-800">{x}{xUnit}</span></p>
-      <p className="text-slate-500">값: <span className="font-semibold text-slate-800">{yFmt(y)}</span></p>
+      <p className="text-slate-500">Value: <span className="font-semibold text-slate-800">{yFmt(y)}</span></p>
     </div>
   )
 }
@@ -78,21 +78,21 @@ export default function WeatherScatterCharts({
 
   return (
     <section>
-      <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">기상 × 매출 산점도</h2>
+      <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Weather × Sales Scatter</h2>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Chart
           data={precipData}
-          title={`강수량 × 일매출  (r = ${correlations.salesVsPrecip})`}
-          xLabel="강수량" xUnit="mm"
-          yLabel="일매출"
+          title={`Precipitation × Daily Sales  (r = ${correlations.salesVsPrecip})`}
+          xLabel="Precipitation" xUnit="mm"
+          yLabel="Daily Sales"
           yFmt={fmtSales} yTickFmt={fmtSales}
           color="#ef4444"
         />
         <Chart
           data={tempData}
-          title={`최고기온 × 아이스 비율  (r = ${correlations.iceRatioVsTemp})`}
-          xLabel="최고기온" xUnit="°C"
-          yLabel="아이스 비율"
+          title={`Max Temp × Ice Ratio  (r = ${correlations.iceRatioVsTemp})`}
+          xLabel="Max Temp" xUnit="°C"
+          yLabel="Ice Ratio"
           yFmt={fmtPct} yTickFmt={fmtPct}
           color="#3b82f6"
         />
