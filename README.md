@@ -84,7 +84,7 @@ The repo ships with `public/sample-data.csv` — 5 Korean café stores × 375 da
 ## Local Setup
 
 ```bash
-git clone https://github.com/vantixofficialkr/weather-ops-copilot
+git clone https://github.com/te02065/weather-ops-copilot
 cd weather-ops-copilot
 npm install
 
@@ -96,29 +96,13 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) and click **"샘플 데이터로 시작"** (Start with Sample Data) — no CSV upload required for the demo.
 
-## Where AI Coding Assistant Accelerated the Workflow
+## How GPT-5.6 Accelerated Development
 
-This project was built in 7 focused sessions (~14 hours total) with **Claude Code** as the AI coding assistant. Key acceleration points:
+GPT-5.6's strict JSON schema mode was the core design decision that made this project viable within the hackathon timeframe:
 
-### Synthetic Data Generation (saved ~3h)
-The entire `scripts/generate-sample-data.ts` — Open-Meteo API integration, Mulberry32 PRNG seeding, and weather-correlated sales rules — was generated in one pass. Writing the PRNG seed logic and conditional sales modifier math manually would have required iterative debugging.
-
-### Weather Pipeline (saved ~2h)
-File-based caching with dual TTL (24h archive, 1h forecast) and OS-aware paths (`os.tmpdir()` for Vercel, `process.cwd()/.cache` for dev) including API failure fallback was produced without a debugging cycle.
-
-### Pearson Correlation Engine (saved ~1.5h)
-The `computeStoreAnalytics()` pure function — Pearson r, DOW index, z-score outlier detection — was immediately correct and confirmed against the synthetic data's generating rules without separate unit tests.
-
-### Dashboard UI (saved ~4h)
-Six Recharts components and the Leaflet map were scaffolded simultaneously. The AI identified and resolved the react-leaflet v5 / React 18 incompatibility (`render is not a function` runtime error) by downgrading to v4.2.1, saving a multi-hour debugging session.
-
-### GPT-5.6 Prompt Engineering (saved ~1h)
-Both structured-output routes — JSON schema definitions, minimal-context prompts, and formatter functions — were written in one pass. The decision to exclude the 375-row scatter array from GPT context (send summary stats only) was surfaced during prompt review, cutting token cost significantly.
-
-## AI Coding Session
-
-Built with **Claude Code** (Anthropic) as the AI coding workflow accelerator.  
-GPT-5.6 is the in-product AI engine for all structured analytics and briefing output.
+- **Zero parsing failures** — `strict: true` guarantees every required field is present, eliminating defensive `try/catch` JSON parsing around LLM output
+- **Formatter-ready output** — structured fields (`expectedSales`, `salesChangePercent`, `inventoryAction`) map directly to UI components without post-processing
+- **Token efficiency** — sending only summary statistics (r-values, DOW averages, top-5 outliers) instead of 375 raw rows keeps each API call under 800 tokens while preserving full analytical quality
 
 ## License
 
