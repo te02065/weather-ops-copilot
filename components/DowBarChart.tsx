@@ -10,6 +10,11 @@ import { DOW_LABELS } from '@/lib/i18n/dictionary'
 
 const fmtSales = (v: number) => `₩${Math.round(v / 10000)}k`
 
+// Chart's actual plot-area inset = Y_AXIS_WIDTH + margin.left (left) / margin.right (right).
+// The index table below reuses these exact values so its 7 columns land under the 7 bars.
+const Y_AXIS_WIDTH = 44
+const CHART_MARGIN = { top: 10, right: 8, bottom: 4, left: 4 }
+
 export default function DowBarChart({ dowEffect }: { dowEffect: DowRow[] }) {
   const { lang, t } = useLanguage()
   const dowLabels = DOW_LABELS[lang]
@@ -18,13 +23,13 @@ export default function DowBarChart({ dowEffect }: { dowEffect: DowRow[] }) {
 
   return (
     <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
-      <h3 className="text-sm font-semibold text-slate-700 mb-1">{t.dowChartTitle}</h3>
+      <h3 className="text-h2 text-slate-700 mb-1">{t.dowChartTitle}</h3>
       <p className="text-xs text-slate-400 mb-4">{t.dowChartDesc}</p>
       <ResponsiveContainer width="100%" height={220}>
-        <BarChart data={dowEffect} margin={{ top: 10, right: 10, bottom: 4, left: 52 }}>
+        <BarChart data={dowEffect} margin={CHART_MARGIN}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
           <XAxis dataKey="dow" tickFormatter={(v: number) => dowLabels[v] ?? ''} tick={{ fontSize: 13 }} />
-          <YAxis tickFormatter={fmtSales} tick={{ fontSize: 11 }} />
+          <YAxis width={Y_AXIS_WIDTH} tickFormatter={fmtSales} tick={{ fontSize: 11 }} />
           <Tooltip
             content={({ active, payload, label }) => {
               if (!active || !payload?.length) return null
@@ -49,8 +54,11 @@ export default function DowBarChart({ dowEffect }: { dowEffect: DowRow[] }) {
         </BarChart>
       </ResponsiveContainer>
 
-      {/* Index table */}
-      <div className="mt-4 grid grid-cols-7 gap-1 text-center">
+      {/* Index table — padded to match the bar chart's plot-area inset exactly */}
+      <div
+        className="mt-4 grid grid-cols-7 gap-1 text-center"
+        style={{ paddingLeft: Y_AXIS_WIDTH + CHART_MARGIN.left, paddingRight: CHART_MARGIN.right }}
+      >
         {dowEffect.map((d) => (
           <div key={d.dow} className="text-xs">
             <div className="font-medium text-slate-700">{dowLabels[d.dow]}</div>

@@ -30,10 +30,10 @@ export default function SalesTimeline({
 
   return (
     <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
-      <h3 className="text-sm font-semibold text-slate-700 mb-1">{storeName} {t.timelineTitleSuffix}</h3>
+      <h3 className="text-h2 text-slate-700 mb-1">{storeName} {t.timelineTitleSuffix}</h3>
       <p className="text-xs text-slate-400 mb-4">{t.timelineDesc}</p>
       <ResponsiveContainer width="100%" height={220}>
-        <AreaChart data={data} margin={{ top: 10, right: 10, bottom: 4, left: 52 }}>
+        <AreaChart data={data} margin={{ top: 10, right: 8, bottom: 4, left: 4 }}>
           <defs>
             <linearGradient id="iceGrad" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%"  stopColor="#3b82f6" stopOpacity={0.5} />
@@ -55,7 +55,7 @@ export default function SalesTimeline({
               return `${m}/'${y}`
             }}
           />
-          <YAxis tickFormatter={fmtSales} tick={{ fontSize: 11 }} />
+          <YAxis width={48} tickFormatter={fmtSales} tick={{ fontSize: 11 }} />
           <Tooltip
             content={({ active, payload, label }) => {
               if (!active || !payload?.length) return null

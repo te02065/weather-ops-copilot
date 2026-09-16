@@ -57,13 +57,13 @@ function ReportCard({
     <div className={`bg-white border ${borderCls} border rounded-xl p-5 shadow-sm space-y-4`}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="font-semibold text-slate-900">{title}</h3>
+          <h3 className="text-h2 text-slate-900">{title}</h3>
           <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>
         </div>
         <button
           onClick={generate}
           disabled={loading}
-          className={`shrink-0 px-4 py-2 ${btnCls} text-white text-sm rounded-lg disabled:opacity-50 transition-colors`}
+          className={`shrink-0 px-4 py-2 ${btnCls} text-white text-action-l rounded-lg disabled:opacity-50 transition-colors`}
         >
           {loading ? t.generating : t.generate}
         </button>
@@ -81,7 +81,7 @@ function ReportCard({
       )}
 
       {content && (
-        <div className="bg-slate-50 rounded-lg p-4 text-sm text-slate-700 whitespace-pre-wrap max-h-[480px] overflow-y-auto leading-relaxed">
+        <div className="bg-slate-50 rounded-lg p-4 text-body-l text-slate-700 whitespace-pre-wrap max-h-[480px] overflow-y-auto">
           {content}
         </div>
       )}

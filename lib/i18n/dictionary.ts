@@ -66,7 +66,7 @@ export const UI: Record<Lang, Dict> = {
     // Upload / hero
     heroTitle: 'Weather-Driven Ops Copilot',
     heroDesc:
-      '매장 판매 CSV를 업로드하세요. 실제 기상 데이터와 결합해 상관관계 인사이트와 GPT-5.6 기반 7일 운영 브리핑을 생성합니다.',
+      '매장 판매 CSV를 업로드하세요. 실제 기상 데이터와 결합해 상관관계 인사이트와 AI 기반 7일 운영 브리핑을 생성합니다.',
     startSample: '샘플 데이터로 시작',
     analyzing: '분석 중…',
     uploadCsv: 'CSV 파일 업로드',
@@ -114,15 +114,15 @@ export const UI: Record<Lang, Dict> = {
     hot: '핫',
 
     // Report section
-    reportSectionTitle: 'GPT-5.6 리포트 생성',
+    reportSectionTitle: 'AI 리포트 생성',
     insightTitle: '📊 인사이트 리포트',
     insightSubtitle: '데이터 기반 인사이트 3~5개 + 실행 액션',
     briefingTitle: '📅 7일 운영 브리핑',
     briefingSubtitle: '예보 기반 매출 예측 + 재고·인력·프로모션 액션',
     generate: '생성하기',
     generating: '생성 중…',
-    generatingHint: 'GPT-5.6이 분석 중입니다…',
-    clickGenerate: '"생성하기"를 눌러 GPT-5.6 리포트를 받아보세요',
+    generatingHint: 'AI가 분석 중입니다…',
+    clickGenerate: '"생성하기"를 눌러 AI 리포트를 받아보세요',
 
     // Generic
     errorPrefix: '오류',
@@ -135,7 +135,7 @@ export const UI: Record<Lang, Dict> = {
     // Upload / hero
     heroTitle: 'Weather-Driven Ops Copilot',
     heroDesc:
-      'Upload your store sales CSV. The copilot combines it with real weather data to generate correlation insights and a 7-day operational briefing via GPT-5.6.',
+      'Upload your store sales CSV. The copilot combines it with real weather data to generate correlation insights and a 7-day operational briefing via AI.',
     startSample: 'Start with Sample Data',
     analyzing: 'Analyzing…',
     uploadCsv: 'Upload CSV File',
@@ -183,15 +183,15 @@ export const UI: Record<Lang, Dict> = {
     hot: 'Hot',
 
     // Report section
-    reportSectionTitle: 'GPT-5.6 Report Generation',
+    reportSectionTitle: 'AI Report Generation',
     insightTitle: '📊 Insight Report',
     insightSubtitle: '3–5 data-backed insights + action plan',
     briefingTitle: '📅 7-Day Operational Briefing',
     briefingSubtitle: 'Forecast-based sales prediction + inventory / staffing / promo actions',
     generate: 'Generate',
     generating: 'Generating…',
-    generatingHint: 'GPT-5.6 analyzing…',
-    clickGenerate: 'Click Generate — GPT-5.6 will write the report',
+    generatingHint: 'AI analyzing…',
+    clickGenerate: 'Click Generate — AI will write the report',
 
     // Generic
     errorPrefix: 'Error',

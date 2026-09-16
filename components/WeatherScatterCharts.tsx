@@ -46,15 +46,15 @@ interface ChartConfig {
 function Chart({ data, title, xLabel, xUnit, yLabel, yFmt, yTickFmt, color }: ChartConfig) {
   return (
     <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
-      <h3 className="text-sm font-semibold text-slate-700 mb-4">{title}</h3>
+      <h3 className="text-h2 text-slate-700 mb-4">{title}</h3>
       <ResponsiveContainer width="100%" height={260}>
-        <ScatterChart margin={{ top: 10, right: 16, bottom: 36, left: 56 }}>
+        <ScatterChart margin={{ top: 10, right: 8, bottom: 36, left: 8 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
           <XAxis dataKey="x" type="number" name={xLabel} tick={{ fontSize: 11 }}>
             <Label value={`${xLabel} (${xUnit})`} position="insideBottom" offset={-20} fontSize={11} fill="#94a3b8" />
           </XAxis>
-          <YAxis dataKey="y" type="number" name={yLabel} tickFormatter={yTickFmt} tick={{ fontSize: 11 }}>
-            <Label value={yLabel} angle={-90} position="insideLeft" offset={16} fontSize={11} fill="#94a3b8" />
+          <YAxis width={72} dataKey="y" type="number" name={yLabel} tickFormatter={yTickFmt} tick={{ fontSize: 11 }}>
+            <Label value={yLabel} angle={-90} position="insideLeft" offset={4} fontSize={11} fill="#94a3b8" />
           </YAxis>
           <Tooltip
             content={

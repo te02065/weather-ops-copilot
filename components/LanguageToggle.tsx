@@ -6,7 +6,7 @@ export default function LanguageToggle() {
   const { lang, setLang } = useLanguage()
 
   return (
-    <div className="flex items-center gap-1.5 text-xs font-medium">
+    <div className="flex items-center gap-1.5 text-action-l">
       <button
         onClick={() => setLang('ko')}
         aria-pressed={lang === 'ko'}

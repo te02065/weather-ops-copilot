@@ -28,8 +28,8 @@ export default function UploadSection({ onUpload, onSample, loading, error }: Pr
       {/* Hero */}
       <div className="text-center space-y-3 max-w-lg">
         <div className="text-6xl">🌤️</div>
-        <h2 className="text-3xl font-bold text-slate-900">{t.heroTitle}</h2>
-        <p className="text-slate-500 leading-relaxed">
+        <h2 className="text-[28px] font-extrabold leading-[1.3] text-slate-900">{t.heroTitle}</h2>
+        <p className="text-body-l text-slate-500 leading-relaxed">
           {t.heroDesc}
         </p>
       </div>
@@ -39,7 +39,7 @@ export default function UploadSection({ onUpload, onSample, loading, error }: Pr
         <button
           onClick={onSample}
           disabled={loading}
-          className="flex items-center gap-2 px-8 py-4 bg-blue-600 text-white rounded-xl font-semibold text-lg shadow-lg hover:bg-blue-700 active:scale-95 disabled:opacity-60 transition-all"
+          className="flex items-center gap-2 px-8 py-4 bg-blue-600 text-white rounded-xl text-action-l shadow-lg hover:bg-blue-700 active:scale-95 disabled:opacity-60 transition-all"
         >
           <span>🚀</span>
           <span>{loading ? t.analyzing : t.startSample}</span>
@@ -47,7 +47,7 @@ export default function UploadSection({ onUpload, onSample, loading, error }: Pr
         <button
           onClick={() => fileRef.current?.click()}
           disabled={loading}
-          className="flex items-center gap-2 px-8 py-4 bg-white text-slate-700 rounded-xl font-semibold text-lg border-2 border-slate-300 hover:border-blue-400 active:scale-95 disabled:opacity-60 transition-all"
+          className="flex items-center gap-2 px-8 py-4 bg-white text-slate-700 rounded-xl text-action-l border-2 border-slate-300 hover:border-blue-400 active:scale-95 disabled:opacity-60 transition-all"
         >
           <span>📂</span>
           <span>{t.uploadCsv}</span>

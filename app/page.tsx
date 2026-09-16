@@ -107,7 +107,7 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <span className="text-xl">🌤️</span>
             <div>
-              <h1 className="text-base font-bold leading-tight">Weather-Driven Ops Copilot</h1>
+              <h1 className="text-h2 leading-tight">WeDOC</h1>
               <p className="text-xs text-slate-400">{t.appSubtitle}</p>
             </div>
           </div>
@@ -116,7 +116,7 @@ export default function Home() {
             {analytics && (
               <button
                 onClick={() => { setAnalytics(null); setWeather(null) }}
-                className="text-xs text-slate-400 hover:text-slate-700 transition"
+                className="text-action-l text-slate-400 hover:text-slate-700 transition"
               >
                 {t.uploadNewFile}
               </button>
@@ -159,7 +159,7 @@ export default function Home() {
                           : 'bg-white border-slate-200 hover:border-blue-300'
                       }`}
                     >
-                      <div className="font-semibold text-sm">{a.storeName}</div>
+                      <div className="text-action-l">{a.storeName}</div>
                       <div className={`text-xs mt-0.5 ${active ? 'text-blue-200' : 'text-slate-400'}`}>
                         {t.avg} ₩{a.summary.avgDailySales.toLocaleString()}
                         &nbsp;·&nbsp;{t.precipR}={a.correlations.salesVsPrecip}
