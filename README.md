@@ -71,7 +71,7 @@ User CSV (browser)
 
 ## Sample Data
 
-The repo ships with `public/sample-data.csv` — 5 Korean café stores × 375 days of synthetic sales data generated using real Open-Meteo historical weather and deterministic correlation rules (Mulberry32 PRNG seeded by date + store index). Correlations are genuine:
+Clicking **"Start with Sample Data"** calls `GET /api/sample-data`, which generates synthetic sales for 5 Korean café stores over a **rolling 365-day window ending ~2 days ago** — always "the most recent year," never a stale fixed date range. It's built from real Open-Meteo historical weather (the same archive fetch `/api/weather` already uses and file-caches) plus deterministic correlation rules (Mulberry32 PRNG seeded by date + store index), so re-running it on the same day reproduces the same numbers. `public/sample-data.csv` is kept only as an offline snapshot (regenerate it with `npm run generate-data`); the running app no longer reads it. Correlations are genuine:
 
 | Store | r(sales × precip) | r(iceRatio × temp) |
 |-------|-------------------|---------------------|
@@ -94,7 +94,7 @@ echo "OPENAI_API_KEY=sk-..." > .env.local
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) and click **"샘플 데이터로 시작"** (Start with Sample Data) — no CSV upload required for the demo.
+Open [http://localhost:3000](http://localhost:3000) and click **"샘플 데이터로 시작" / "Start with Sample Data"** — no CSV upload required for the demo. Use the 한국어 / EN toggle in the header to switch the UI language; GPT report generation (Insight Report, 7-Day Briefing) responds in whichever language is selected.
 
 ## How GPT-5.6 Accelerated Development
 

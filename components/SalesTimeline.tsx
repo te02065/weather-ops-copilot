@@ -5,6 +5,7 @@ import {
   Tooltip, ResponsiveContainer,
 } from 'recharts'
 import type { ScatterPoint } from '@/lib/analytics'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 const fmtSales = (v: number) => `₩${Math.round(v / 10000)}k`
 
@@ -15,6 +16,7 @@ export default function SalesTimeline({
   scatter: ScatterPoint[]
   storeName: string
 }) {
+  const { t } = useLanguage()
   const data = [...scatter]
     .sort((a, b) => a.date.localeCompare(b.date))
     .map((p) => ({
@@ -28,8 +30,8 @@ export default function SalesTimeline({
 
   return (
     <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
-      <h3 className="text-sm font-semibold text-slate-700 mb-1">{storeName} — 1-Year Sales Trend</h3>
-      <p className="text-xs text-slate-400 mb-4">Iced (blue) + Hot (orange)</p>
+      <h3 className="text-sm font-semibold text-slate-700 mb-1">{storeName} {t.timelineTitleSuffix}</h3>
+      <p className="text-xs text-slate-400 mb-4">{t.timelineDesc}</p>
       <ResponsiveContainer width="100%" height={220}>
         <AreaChart data={data} margin={{ top: 10, right: 10, bottom: 4, left: 52 }}>
           <defs>
@@ -62,7 +64,7 @@ export default function SalesTimeline({
                   <p className="font-semibold text-slate-700">{String(label)}</p>
                   {payload.map((p) => (
                     <p key={String(p.dataKey)} className="text-slate-500">
-                      {p.dataKey === 'iceSales' ? 'Iced' : 'Hot'}:{' '}
+                      {p.dataKey === 'iceSales' ? t.iced : t.hot}:{' '}
                       {fmtSales(typeof p.value === 'number' ? p.value : 0)}
                     </p>
                   ))}

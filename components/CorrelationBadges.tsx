@@ -1,9 +1,18 @@
 import type { Correlations } from '@/lib/analytics'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
+import type { Dict } from '@/lib/i18n/dictionary'
 
-function Badge({ label, r, description }: { label: string; r: number; description: string }) {
+function Badge({
+  label, r, description, t,
+}: {
+  label: string
+  r: number
+  description: string
+  t: Dict
+}) {
   const abs      = Math.abs(r)
   const positive = r >= 0
-  const strength = abs >= 0.7 ? 'Strong' : abs >= 0.4 ? 'Moderate' : 'Weak'
+  const strength = abs >= 0.7 ? t.strong : abs >= 0.4 ? t.moderate : t.weak
 
   const bg      = positive ? 'bg-blue-50  border-blue-200'  : 'bg-red-50  border-red-200'
   const textCol = positive ? 'text-blue-900'                 : 'text-red-900'
@@ -14,7 +23,7 @@ function Badge({ label, r, description }: { label: string; r: number; descriptio
     <div className={`border rounded-xl p-4 ${bg}`}>
       <p className={`text-xs font-semibold opacity-60 uppercase tracking-wide ${textCol}`}>{label}</p>
       <p className={`text-3xl font-bold mt-1 ${textCol}`}>{sign}{r.toFixed(3)}</p>
-      <p className={`text-xs mt-0.5 opacity-50 ${textCol}`}>{strength} {positive ? 'positive' : 'negative'} correlation</p>
+      <p className={`text-xs mt-0.5 opacity-50 ${textCol}`}>{strength} {positive ? t.positiveCorr : t.negativeCorr}</p>
       <div className="mt-3 h-1.5 bg-black/10 rounded-full overflow-hidden">
         <div className={`h-full rounded-full transition-all ${barCol}`} style={{ width: `${abs * 100}%` }} />
       </div>
@@ -24,29 +33,34 @@ function Badge({ label, r, description }: { label: string; r: number; descriptio
 }
 
 export default function CorrelationBadges({ correlations }: { correlations: Correlations }) {
+  const { t } = useLanguage()
   return (
     <section>
-      <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Pearson Correlation Coefficients</h2>
+      <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">{t.pearsonTitle}</h2>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Badge
-          label="Sales × Precipitation"
+          label={t.badgeSalesPrecip}
           r={correlations.salesVsPrecip}
-          description="Sales drop on rainy days"
+          description={t.badgeSalesPrecipDesc}
+          t={t}
         />
         <Badge
-          label="Ice Ratio × Temperature"
+          label={t.badgeIceTemp}
           r={correlations.iceRatioVsTemp}
-          description="Hotter → more iced drinks"
+          description={t.badgeIceTempDesc}
+          t={t}
         />
         <Badge
-          label="Sales × Temperature"
+          label={t.badgeSalesTemp}
           r={correlations.salesVsTemp}
-          description="Mixed monsoon effect"
+          description={t.badgeSalesTempDesc}
+          t={t}
         />
         <Badge
-          label="Sales × Apparent Temp"
+          label={t.badgeSalesApparent}
           r={correlations.salesVsApparentTemp}
-          description="Apparent temperature effect"
+          description={t.badgeSalesApparentDesc}
+          t={t}
         />
       </div>
     </section>

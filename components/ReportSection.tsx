@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import type { StoreAnalytics } from '@/lib/analytics'
 import type { StoreWeather } from '@/lib/weather'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 interface Props {
   analytics: StoreAnalytics
@@ -22,6 +23,7 @@ function ReportCard({
   endpoint: string
   payload: unknown
 }) {
+  const { lang, t } = useLanguage()
   const [loading, setLoading] = useState(false)
   const [content, setContent] = useState<string | null>(null)
   const [error, setError]     = useState<string | null>(null)
@@ -34,11 +36,12 @@ function ReportCard({
   async function generate() {
     setLoading(true)
     setError(null)
+    setContent(null)
     try {
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ ...(payload as object), lang }),
       })
       if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
       const data = await res.json() as { content: string }
@@ -62,14 +65,14 @@ function ReportCard({
           disabled={loading}
           className={`shrink-0 px-4 py-2 ${btnCls} text-white text-sm rounded-lg disabled:opacity-50 transition-colors`}
         >
-          {loading ? 'Generating…' : 'Generate'}
+          {loading ? t.generating : t.generate}
         </button>
       </div>
 
       {loading && (
         <div className="flex items-center gap-2 text-sm text-slate-400">
           <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
-          GPT-5.6 analyzing…
+          {t.generatingHint}
         </div>
       )}
 
@@ -85,7 +88,7 @@ function ReportCard({
 
       {!content && !loading && !error && (
         <div className="bg-slate-50 rounded-lg p-6 text-sm text-slate-400 text-center">
-          Click Generate — GPT-5.6 will write the report
+          {t.clickGenerate}
         </div>
       )}
     </div>
@@ -93,20 +96,21 @@ function ReportCard({
 }
 
 export default function ReportSection({ analytics, weather }: Props) {
+  const { t } = useLanguage()
   return (
     <section className="space-y-4">
-      <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest">GPT-5.6 Report Generation</h2>
+      <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest">{t.reportSectionTitle}</h2>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ReportCard
-          title="📊 Insight Report"
-          subtitle="3–5 data-backed insights + action plan"
+          title={t.insightTitle}
+          subtitle={t.insightSubtitle}
           color="blue"
           endpoint="/api/report/insight"
           payload={{ analytics }}
         />
         <ReportCard
-          title="📅 7-Day Operational Briefing"
-          subtitle="Forecast-based sales prediction + inventory / staffing / promo actions"
+          title={t.briefingTitle}
+          subtitle={t.briefingSubtitle}
           color="orange"
           endpoint="/api/report/briefing"
           payload={{ analytics, forecast: weather.forecast }}

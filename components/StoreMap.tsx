@@ -4,6 +4,7 @@ import 'leaflet/dist/leaflet.css'
 import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet'
 import { STORES } from '@/lib/stores'
 import type { StoreAnalytics } from '@/lib/analytics'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 const STORE_COLORS: Record<string, string> = {
   gangnam:  '#3b82f6',
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export default function StoreMap({ analytics, selectedId, onSelect }: Props) {
+  const { t } = useLanguage()
   const aMap = new Map(analytics.map((a) => [a.storeId, a]))
 
   return (
@@ -56,9 +58,9 @@ export default function StoreMap({ analytics, selectedId, onSelect }: Props) {
                   <p className="font-bold">{store.name}</p>
                   {a && (
                     <>
-                      <p className="text-slate-600">일평균 ₩{a.summary.avgDailySales.toLocaleString()}</p>
-                      <p className="text-red-600 text-xs">강수×매출 r = {a.correlations.salesVsPrecip}</p>
-                      <p className="text-blue-600 text-xs">아이스×기온 r = {a.correlations.iceRatioVsTemp}</p>
+                      <p className="text-slate-600">{t.avg} ₩{a.summary.avgDailySales.toLocaleString()}</p>
+                      <p className="text-red-600 text-xs">{t.badgeSalesPrecip} r = {a.correlations.salesVsPrecip}</p>
+                      <p className="text-blue-600 text-xs">{t.badgeIceTemp} r = {a.correlations.iceRatioVsTemp}</p>
                     </>
                   )}
                 </div>

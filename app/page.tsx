@@ -11,6 +11,8 @@ import WeatherScatterCharts from '@/components/WeatherScatterCharts'
 import DowBarChart          from '@/components/DowBarChart'
 import SalesTimeline        from '@/components/SalesTimeline'
 import ReportSection        from '@/components/ReportSection'
+import LanguageToggle       from '@/components/LanguageToggle'
+import { useLanguage }      from '@/lib/i18n/LanguageContext'
 
 // Leaflet is browser-only — must be dynamically imported with ssr: false
 const StoreMap = dynamic(() => import('@/components/StoreMap'), {
@@ -51,6 +53,7 @@ function parseSalesRow(r: CsvRow): SalesRow {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function Home() {
+  const { t } = useLanguage()
   const [analytics,  setAnalytics]  = useState<StoreAnalytics[] | null>(null)
   const [weather,    setWeather]    = useState<StoreWeather[]   | null>(null)
   const [selectedId, setSelectedId] = useState('gangnam')
@@ -88,8 +91,8 @@ export default function Home() {
   }
 
   async function loadSample() {
-    const res = await fetch('/sample-data.csv')
-    if (!res.ok) throw new Error('Failed to load sample CSV')
+    const res = await fetch('/api/sample-data')
+    if (!res.ok) throw new Error('Failed to load sample data')
     await processData(await res.text())
   }
 
@@ -105,17 +108,20 @@ export default function Home() {
             <span className="text-xl">🌤️</span>
             <div>
               <h1 className="text-base font-bold leading-tight">Weather-Driven Ops Copilot</h1>
-              <p className="text-xs text-slate-400">Sales × Weather Analytics &amp; 7-Day Briefing</p>
+              <p className="text-xs text-slate-400">{t.appSubtitle}</p>
             </div>
           </div>
-          {analytics && (
-            <button
-              onClick={() => { setAnalytics(null); setWeather(null) }}
-              className="text-xs text-slate-400 hover:text-slate-700 transition"
-            >
-              ↩ Upload new file
-            </button>
-          )}
+          <div className="flex items-center gap-4">
+            <LanguageToggle />
+            {analytics && (
+              <button
+                onClick={() => { setAnalytics(null); setWeather(null) }}
+                className="text-xs text-slate-400 hover:text-slate-700 transition"
+              >
+                {t.uploadNewFile}
+              </button>
+            )}
+          </div>
         </div>
       </header>
 
@@ -140,7 +146,7 @@ export default function Home() {
                 />
               </div>
               <div className="space-y-2">
-                <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Select Store</h2>
+                <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest">{t.selectStore}</h2>
                 {analytics.map((a) => {
                   const active = a.storeId === selectedId
                   return (
@@ -155,8 +161,8 @@ export default function Home() {
                     >
                       <div className="font-semibold text-sm">{a.storeName}</div>
                       <div className={`text-xs mt-0.5 ${active ? 'text-blue-200' : 'text-slate-400'}`}>
-                        Avg ₩{a.summary.avgDailySales.toLocaleString()}
-                        &nbsp;·&nbsp;Precip r={a.correlations.salesVsPrecip}
+                        {t.avg} ₩{a.summary.avgDailySales.toLocaleString()}
+                        &nbsp;·&nbsp;{t.precipR}={a.correlations.salesVsPrecip}
                       </div>
                     </button>
                   )

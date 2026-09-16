@@ -1,44 +1,24 @@
 import { NextResponse } from 'next/server'
-import { readFileSync } from 'fs'
-import { join } from 'path'
-import { parse } from 'papaparse'
 import { getStoreWeather } from '@/lib/weather'
 import { computeStoreAnalytics, type SalesRow } from '@/lib/analytics'
+import { generateSampleSalesRows, type SampleSalesRow } from '@/lib/sampleData'
 import { STORES } from '@/lib/stores'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-// ── CSV helpers ───────────────────────────────────────────────────────────────
+// ── Sample sales (dynamic, rolling window — see lib/sampleData.ts) ────────────
 
-interface CsvRow {
-  date: string
-  store_id: string
-  store_name: string
-  lat: string
-  lon: string
-  total_sales: string
-  ice_sales: string
-  hot_sales: string
-  transactions: string
-}
-
-function parseSalesRow(r: CsvRow): SalesRow {
+function toSalesRow(r: SampleSalesRow): SalesRow {
   return {
     date:         r.date,
     storeId:      r.store_id,
     storeName:    r.store_name,
-    totalSales:   parseInt(r.total_sales),
-    iceSales:     parseInt(r.ice_sales),
-    hotSales:     parseInt(r.hot_sales),
-    transactions: parseInt(r.transactions),
+    totalSales:   r.total_sales,
+    iceSales:     r.ice_sales,
+    hotSales:     r.hot_sales,
+    transactions: r.transactions,
   }
-}
-
-function loadSampleCsv(): SalesRow[] {
-  const csv = readFileSync(join(process.cwd(), 'public', 'sample-data.csv'), 'utf-8')
-  const { data } = parse<CsvRow>(csv, { header: true, skipEmptyLines: true })
-  return data.map(parseSalesRow)
 }
 
 // ── Route ─────────────────────────────────────────────────────────────────────
@@ -48,7 +28,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const storeId = searchParams.get('storeId')
 
-    const allSales = loadSampleCsv()
+    const allSales = (await generateSampleSalesRows()).map(toSalesRow)
 
     if (storeId) {
       const storeSales = allSales.filter((r) => r.storeId === storeId)

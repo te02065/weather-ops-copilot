@@ -12,6 +12,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { tmpdir } from 'os'
 import { STORES } from './stores'
+import { getRollingArchiveRange } from './dateRange'
 
 // ── Cache ────────────────────────────────────────────────────────────────────
 
@@ -85,10 +86,6 @@ interface OpenMeteoResponse {
 const DAILY_VARS =
   'temperature_2m_max,temperature_2m_min,precipitation_sum,apparent_temperature_max'
 
-function fmt(d: Date): string {
-  return d.toISOString().slice(0, 10)
-}
-
 function parsePoints(daily: OpenMeteoDaily): DailyPoint[] {
   return daily.time.map((date, i) => ({
     date,
@@ -102,9 +99,10 @@ function parsePoints(daily: OpenMeteoDaily): DailyPoint[] {
 // ── Fetchers ─────────────────────────────────────────────────────────────────
 
 async function fetchArchive(lat: number, lon: number): Promise<DailyPoint[]> {
-  // Start from the same date as sample-data.csv for full coverage
-  const startDate = '2025-07-01'
-  const endDate = fmt(new Date(Date.now() - 2 * 86_400_000))  // 2-day archive delay
+  // Rolling window: always "the most recent N days up to ~2 days ago",
+  // shared with the synthetic sample-data generator (lib/sampleData.ts)
+  // so archive weather and sample sales dates always overlap.
+  const { startDate, endDate } = getRollingArchiveRange()
 
   const params = new URLSearchParams({
     latitude:   String(lat),

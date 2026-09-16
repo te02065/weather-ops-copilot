@@ -1,14 +1,16 @@
 /**
  * POST /api/report/insight
- * Body: { analytics: StoreAnalytics }
+ * Body: { analytics: StoreAnalytics, lang?: 'ko' | 'en' }
  * Returns: { content: string, raw: InsightReport }
  *
- * GPT-5.6 structured output — 과거 기상-매출 인사이트 리포트
+ * GPT-5.6 structured output — historical weather × sales insight report.
+ * Responds in the requested language (default 'ko').
  */
 
 import { NextResponse } from 'next/server'
 import { openai, MODEL } from '@/lib/openai'
 import type { StoreAnalytics } from '@/lib/analytics'
+import type { Lang } from '@/lib/i18n/dictionary'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -20,21 +22,21 @@ const SCHEMA = {
   properties: {
     title: {
       type: 'string',
-      description: '리포트 제목 (매장명 포함)',
+      description: 'Report title, including the store name',
     },
     storeOverview: {
       type: 'string',
-      description: '매장 1년 운영 현황 요약 (2~3문장, 핵심 수치 포함)',
+      description: '2-3 sentence summary of the store\'s 1-year operating performance, with key figures',
     },
     insights: {
       type: 'array',
-      description: '데이터 기반 인사이트 3~5개',
+      description: '3-5 data-driven insights',
       items: {
         type: 'object',
         properties: {
-          title:   { type: 'string', description: '인사이트 제목 (15자 이내)' },
-          finding: { type: 'string', description: '피어슨 r값 등 수치를 인용한 데이터 근거' },
-          action:  { type: 'string', description: '담당자가 이번 주 당장 실행할 수 있는 구체적 액션' },
+          title:   { type: 'string', description: 'Insight title (short, under ~15 words / 15 Korean chars)' },
+          finding: { type: 'string', description: 'Data evidence citing the actual Pearson r-value etc.' },
+          action:  { type: 'string', description: 'A concrete action the manager can execute this week' },
           impact:  { type: 'string', enum: ['high', 'medium', 'low'] },
         },
         required: ['title', 'finding', 'action', 'impact'],
@@ -43,7 +45,7 @@ const SCHEMA = {
     },
     keyTakeaway: {
       type: 'string',
-      description: '경영진에게 전달할 한 줄 핵심 결론',
+      description: 'One-line key conclusion to report to leadership',
     },
   },
   required: ['title', 'storeOverview', 'insights', 'keyTakeaway'],
@@ -52,7 +54,7 @@ const SCHEMA = {
 
 // ── Context builder ───────────────────────────────────────────────────────────
 
-function buildContext(a: StoreAnalytics): string {
+function buildContext(a: StoreAnalytics, lang: Lang): string {
   const c = a.correlations
 
   const dowStr = a.dowEffect
@@ -63,6 +65,27 @@ function buildContext(a: StoreAnalytics): string {
     .slice(0, 5)
     .map((o) => `  ${o.date} z=${o.zScore} ₩${o.totalSales.toLocaleString()} [${o.tags.join(', ')}]`)
     .join('\n')
+
+  if (lang === 'en') {
+    return [
+      `Store: ${a.storeName}`,
+      `Period: ${a.period.start} ~ ${a.period.end} (${a.period.days} days)`,
+      `Avg daily sales: ₩${a.summary.avgDailySales.toLocaleString()}`,
+      `Max/Min: ₩${a.summary.maxDailySales.toLocaleString()} / ₩${a.summary.minDailySales.toLocaleString()}`,
+      '',
+      '[Pearson correlation coefficients]',
+      `  Sales x Precipitation: r = ${c.salesVsPrecip}  <- sales drop sharply on rainy days`,
+      `  Ice ratio x Temperature: r = ${c.iceRatioVsTemp}  <- iced-drink ratio rises sharply as it gets hotter`,
+      `  Sales x Temperature: r = ${c.salesVsTemp}  (weak, mixed monsoon effect)`,
+      `  Sales x Apparent temperature: r = ${c.salesVsApparentTemp}`,
+      '',
+      '[Average sales by day of week]',
+      dowStr,
+      '',
+      '[Top 5 sales outliers (|z| > 2)]',
+      outlierStr || '  None',
+    ].join('\n')
+  }
 
   return [
     `매장: ${a.storeName}`,
@@ -93,14 +116,17 @@ interface InsightReport {
   keyTakeaway: string
 }
 
-function format(r: InsightReport): string {
+function format(r: InsightReport, lang: Lang): string {
   const icon: Record<string, string> = { high: '🔴', medium: '🟡', low: '🟢' }
+  const insightsHeader = lang === 'en' ? '── Insights ──────────────────────────────' : '── 인사이트 ──────────────────────────────'
+  const takeawayHeader = lang === 'en' ? '── Key Takeaway ──────────────────────────' : '── 핵심 결론 ──────────────────────────────'
+
   const lines: string[] = [
     `📊 ${r.title}`,
     '',
     r.storeOverview,
     '',
-    '── 인사이트 ──────────────────────────────',
+    insightsHeader,
     '',
   ]
   r.insights.forEach((ins, i) => {
@@ -109,16 +135,56 @@ function format(r: InsightReport): string {
     lines.push(`   ✅ ${ins.action}`)
     lines.push('')
   })
-  lines.push('── 핵심 결론 ──────────────────────────────')
+  lines.push(takeawayHeader)
   lines.push(`💡 ${r.keyTakeaway}`)
   return lines.join('\n')
 }
 
-// ── Demo fallback (pre-generated content) ────────────────────────────────────
+// ── Demo fallback (pre-generated content, used when no API key / API failure) ─
 
-function buildDemoInsight(a: StoreAnalytics): InsightReport {
+function buildDemoInsight(a: StoreAnalytics, lang: Lang): InsightReport {
   const avg = a.summary.avgDailySales.toLocaleString()
   const c   = a.correlations
+
+  if (lang === 'en') {
+    return {
+      title: `${a.storeName} Weather-Sales Insight Report (${a.period.start} ~ ${a.period.end})`,
+      storeOverview:
+        `Over ${a.period.days} days of operation, ${a.storeName} averaged ₩${avg} in daily sales. ` +
+        `With a high of ₩${a.summary.maxDailySales.toLocaleString()} and a low of ₩${a.summary.minDailySales.toLocaleString()}, ` +
+        `sales showed clear variation tied to weather conditions.`,
+      insights: [
+        {
+          title: 'Rain drags sales down',
+          finding: `Sales x Precipitation Pearson r = ${c.salesVsPrecip} (strong negative correlation). Sales drop roughly 20% below average once precipitation reaches 5mm+.`,
+          action:  'When 3mm+ rain is forecast, cut next-day inventory by 10% and pre-schedule a delivery/takeout promotion.',
+          impact:  'high',
+        },
+        {
+          title: 'Iced drinks surge as it heats up',
+          finding: `Ice ratio x Temperature r = ${c.iceRatioVsTemp} (very strong positive correlation). Above 30°C, the iced-drink share rises past 70%.`,
+          action:  'When 28°C+ is forecast, order 40% extra iced coffee beans, ice, and cups versus a normal day.',
+          impact:  'high',
+        },
+        {
+          title: 'Weekend sales premium: +12%',
+          finding: `Sat/Sun average sales run 10-13% above weekdays, with Sunday posting the highest day-of-week index.`,
+          action:  'Add one extra opening staff member on weekends, and tease weekend-only drink specials on social media by Thursday.',
+          impact:  'medium',
+        },
+        {
+          title: 'The monsoon paradox: temp up, sales down',
+          finding: `Sales x Temperature r = ${c.salesVsTemp} (weak negative). Summer heat coincides with rain, producing a counterintuitive net dip in sales.`,
+          action:  'During the July-August monsoon, plan inventory and staffing around precipitation forecasts rather than temperature.',
+          impact:  'medium',
+        },
+      ],
+      keyTakeaway:
+        `Precipitation is the strongest single predictor of sales (r=${c.salesVsPrecip}), so build a routine of checking the forecast every afternoon ` +
+        `and immediately adjusting inventory, staffing, and promotions.`,
+    }
+  }
+
   return {
     title: `${a.storeName} 기상-매출 인사이트 리포트 (${a.period.start} ~ ${a.period.end})`,
     storeOverview:
@@ -160,12 +226,25 @@ function buildDemoInsight(a: StoreAnalytics): InsightReport {
 // ── Route ─────────────────────────────────────────────────────────────────────
 
 export async function POST(request: Request) {
-  const { analytics } = (await request.json()) as { analytics: StoreAnalytics }
+  const body = (await request.json()) as { analytics: StoreAnalytics; lang?: Lang }
+  const analytics = body.analytics
+  const lang: Lang = body.lang === 'en' ? 'en' : 'ko'
 
   try {
     if (!process.env.OPENAI_API_KEY) throw new Error('NO_KEY')
 
-    const context = buildContext(analytics)
+    const context = buildContext(analytics, lang)
+
+    const systemPrompt = lang === 'en'
+      ? 'You are a business consultant specializing in cafe/retail franchise operations. ' +
+        'Always cite the actual data figures, and respond in English with concrete actions the store manager can execute right away.'
+      : '당신은 카페 프랜차이즈 운영 전문 비즈니스 컨설턴트입니다. ' +
+        '데이터 수치를 반드시 인용하고, 담당자가 당장 실행할 수 있는 구체적 액션을 한국어로 제공하세요.'
+
+    const userPrompt = lang === 'en'
+      ? `Using ${analytics.storeName}'s 1-year weather-sales correlation data below, write an insight report for the operations team.\n\n${context}`
+      : `${analytics.storeName}의 1년 기상-매출 상관분석 데이터를 바탕으로 ` +
+        `운영진용 인사이트 리포트를 작성해주세요.\n\n${context}`
 
     const completion = await openai.chat.completions.create({
       model: MODEL,
@@ -178,25 +257,15 @@ export async function POST(request: Request) {
         },
       } as Parameters<typeof openai.chat.completions.create>[0]['response_format'],
       messages: [
-        {
-          role: 'system',
-          content:
-            '당신은 카페 프랜차이즈 운영 전문 비즈니스 컨설턴트입니다. ' +
-            '데이터 수치를 반드시 인용하고, 담당자가 당장 실행할 수 있는 구체적 액션을 한국어로 제공하세요.',
-        },
-        {
-          role: 'user',
-          content:
-            `${analytics.storeName}의 1년 기상-매출 상관분석 데이터를 바탕으로 ` +
-            `운영진용 인사이트 리포트를 작성해주세요.\n\n${context}`,
-        },
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
       ],
     })
 
     const raw = JSON.parse(completion.choices[0]?.message?.content ?? '{}') as InsightReport
-    return NextResponse.json({ content: format(raw), raw })
+    return NextResponse.json({ content: format(raw, lang), raw })
   } catch {
-    const raw = buildDemoInsight(analytics)
-    return NextResponse.json({ content: format(raw), raw })
+    const raw = buildDemoInsight(analytics, lang)
+    return NextResponse.json({ content: format(raw, lang), raw })
   }
 }
