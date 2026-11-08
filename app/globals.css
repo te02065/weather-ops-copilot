@@ -25,3 +25,13 @@ body {
     text-wrap: balance;
   }
 }
+
+/* 주간 브리핑 인쇄 (A4 한 장): 화면에서는 인쇄 양식을 숨기고, 인쇄할 때는 body 바로 아래의 나머지를 모두 숨깁니다.
+   (visibility로 가리면 화면 내용이 빈 페이지를 만들므로 display로 숨깁니다) */
+.print-root { display: none; }
+@media print {
+  @page { size: A4; margin: 12mm; }
+  body > *:not(.print-root) { display: none !important; }
+  .print-root { display: block !important; }
+  .no-print { display: none !important; }
+}

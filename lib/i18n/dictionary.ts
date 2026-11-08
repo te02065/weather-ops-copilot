@@ -108,7 +108,7 @@ export const UI: Record<Lang, Dict> = {
     dowChartDesc: '점선: 전체 평균  |  주황: 주말',
 
     // Sales timeline
-    timelineTitleSuffix: '— 1년 매출 추이',
+    timelineTitleSuffix: '- 1년 매출 추이',
     timelineDesc: '아이스(파랑) + 핫(주황)',
     iced: '아이스',
     hot: '핫',
@@ -177,7 +177,7 @@ export const UI: Record<Lang, Dict> = {
     dowChartDesc: 'Dashed: overall avg  |  Orange: weekend',
 
     // Sales timeline
-    timelineTitleSuffix: '— 1-Year Sales Trend',
+    timelineTitleSuffix: '- 1-Year Sales Trend',
     timelineDesc: 'Iced (blue) + Hot (orange)',
     iced: 'Iced',
     hot: 'Hot',
@@ -191,7 +191,7 @@ export const UI: Record<Lang, Dict> = {
     generate: 'Generate',
     generating: 'Generating…',
     generatingHint: 'AI analyzing…',
-    clickGenerate: 'Click Generate — AI will write the report',
+    clickGenerate: 'Click Generate - AI will write the report',
 
     // Generic
     errorPrefix: 'Error',

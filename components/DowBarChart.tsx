@@ -4,7 +4,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, ReferenceLine, Cell,
 } from 'recharts'
-import type { DowRow } from '@/lib/analytics'
+import type { DowRow } from '@/analysis/summary'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
 import { DOW_LABELS } from '@/lib/i18n/dictionary'
 
@@ -54,7 +54,7 @@ export default function DowBarChart({ dowEffect }: { dowEffect: DowRow[] }) {
         </BarChart>
       </ResponsiveContainer>
 
-      {/* Index table — padded to match the bar chart's plot-area inset exactly */}
+      {/* Index table - padded to match the bar chart's plot-area inset exactly */}
       <div
         className="mt-4 grid grid-cols-7 gap-1 text-center"
         style={{ paddingLeft: Y_AXIS_WIDTH + CHART_MARGIN.left, paddingRight: CHART_MARGIN.right }}

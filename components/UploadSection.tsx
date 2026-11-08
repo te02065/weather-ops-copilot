@@ -4,37 +4,30 @@ import { useRef } from 'react'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 interface Props {
-  onUpload: (csvText: string) => Promise<void>
+  onFile: (file: File) => Promise<void>
   onSample: () => Promise<void>
   loading: boolean
   error: string | null
 }
 
-export default function UploadSection({ onUpload, onSample, loading, error }: Props) {
+export default function UploadSection({ onFile, onSample, loading, error }: Props) {
   const { t } = useLanguage()
   const fileRef = useRef<HTMLInputElement>(null)
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = (ev) => onUpload(ev.target?.result as string)
-    reader.readAsText(file, 'utf-8')
     e.target.value = ''
+    if (file) void onFile(file)
   }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[65vh] gap-10">
-      {/* Hero */}
       <div className="text-center space-y-3 max-w-lg">
         <div className="text-6xl">🌤️</div>
         <h2 className="text-[28px] font-extrabold leading-[1.3] text-slate-900">{t.heroTitle}</h2>
-        <p className="text-body-l text-slate-500 leading-relaxed">
-          {t.heroDesc}
-        </p>
+        <p className="text-body-l text-slate-500 leading-relaxed">{t.heroDesc}</p>
       </div>
 
-      {/* Buttons */}
       <div className="flex flex-col sm:flex-row gap-4">
         <button
           onClick={onSample}
@@ -52,28 +45,22 @@ export default function UploadSection({ onUpload, onSample, loading, error }: Pr
           <span>📂</span>
           <span>{t.uploadCsv}</span>
         </button>
-        <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={handleFile} />
+        <input ref={fileRef} type="file" accept=".csv,.xlsx" className="hidden" onChange={handleFile} />
       </div>
 
-      {/* Column spec hint */}
       <div className="bg-slate-100 rounded-xl px-6 py-4 text-center max-w-xl">
         <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">{t.csvFormatLabel}</p>
-        <code className="text-xs text-slate-600 break-all">
-          date, store_id, store_name, lat, lon, total_sales, ice_sales, hot_sales, transactions
-        </code>
+        <p className="text-xs text-slate-600">필수 열: 날짜, 매출. 나머지는 선택입니다. 열은 다음 화면에서 직접 고릅니다.</p>
       </div>
 
-      {/* Loading indicator */}
       {loading && (
         <div className="flex items-center gap-3 text-slate-500 text-sm">
           <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
           {t.loadingWeather}
         </div>
       )}
-
-      {/* Error */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-6 py-3 text-sm max-w-md">
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-6 py-3 text-sm max-w-md whitespace-pre-line">
           ⚠️ {error}
         </div>
       )}
