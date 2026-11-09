@@ -10,8 +10,9 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { validateCatalog, type MenuCatalog } from '../analysis/menuCatalog'
+import { writableDataDir } from '../lib/dataPaths'
 
-export const CATALOG_DIR = join(process.cwd(), 'data', 'menu_catalog')
+export const CATALOG_DIR = writableDataDir('menu_catalog')
 
 const STORE_ID = /^[A-Za-z0-9_-]{1,40}$/
 

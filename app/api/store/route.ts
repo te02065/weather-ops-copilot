@@ -7,9 +7,9 @@
  */
 
 import { existsSync, readFileSync } from 'fs'
-import { join } from 'path'
 import { NextResponse } from 'next/server'
 import { loadStationList, nearestStation } from '@/weather/station'
+import { configFilePath } from '@/lib/dataPaths'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -20,7 +20,7 @@ interface StoreFile {
 
 export function GET(request: Request) {
   const wanted = new URL(request.url).searchParams.get('storeId')
-  const path = join(process.cwd(), 'data', 'stores.json')
+  const path = configFilePath('stores.json')
   if (!existsSync(path)) {
     return NextResponse.json({ code: 'E_NO_STORE', message: 'data/stores.json에 매장 정보가 없습니다.' }, { status: 404 })
   }

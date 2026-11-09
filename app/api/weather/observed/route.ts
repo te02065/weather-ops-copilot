@@ -13,6 +13,7 @@ import { readKmaKey } from '@/weather/kmaKey'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
+export const maxDuration = 60
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/
 

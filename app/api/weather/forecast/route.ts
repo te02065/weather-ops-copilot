@@ -17,12 +17,14 @@ import { fetchMid, midDates } from '@/weather/midFcst'
 import { daysBetween } from '@/analysis/dates'
 import { readKmaKey } from '@/weather/kmaKey'
 import { skyFromText } from '@/weather/forecastDay'
+import { configFilePath, writableDataDir } from '@/lib/dataPaths'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
+export const maxDuration = 60
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/
-const CACHE_DIR = join(process.cwd(), 'data', 'weather_cache', 'forecast')
+const CACHE_DIR = writableDataDir('weather_cache', 'forecast')
 
 interface StoreGrid { nx: number; ny: number }
 
@@ -60,7 +62,7 @@ export async function GET(request: Request) {
 /** 매장 격자 번호 (첫 매장). 없거나 숫자가 아니면 null. */
 function readStoreGrid(): StoreGrid | null {
   try {
-    const stores = JSON.parse(readFileSync(join(process.cwd(), 'data', 'stores.json'), 'utf-8')) as {
+    const stores = JSON.parse(readFileSync(configFilePath('stores.json'), 'utf-8')) as {
       stores: Array<{ forecastGrid?: { nx?: number; ny?: number } }>
     }
     const g = stores.stores[0]?.forecastGrid

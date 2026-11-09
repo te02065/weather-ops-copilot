@@ -12,8 +12,9 @@ import { join } from 'path'
 import { CONFIG } from '../analysis/config'
 import { haversineKm } from './geo'
 import type { StationList, StationRecord } from './types'
+import { configFilePath } from '../lib/dataPaths'
 
-export const STATION_LIST_FILE = join('data', 'weather_cache', 'stations.json')
+export const STATION_LIST_FILE = configFilePath('weather_cache', 'stations.json')
 
 export type NearestResult =
   | { status: 'unconfirmed'; note: '[확인 필요]' }

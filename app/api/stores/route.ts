@@ -7,14 +7,14 @@
  */
 
 import { existsSync, readFileSync } from 'fs'
-import { join } from 'path'
 import { NextResponse } from 'next/server'
+import { configFilePath } from '@/lib/dataPaths'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 export function GET() {
-  const path = join(process.cwd(), 'data', 'stores.json')
+  const path = configFilePath('stores.json')
   if (!existsSync(path)) return NextResponse.json({ stores: [] })
   const stores = (JSON.parse(readFileSync(path, 'utf-8')) as { stores: Array<{ storeId: string; storeName: string }> }).stores
   return NextResponse.json({ stores: stores.map((s) => ({ storeCode: s.storeId, storeName: s.storeName })) })

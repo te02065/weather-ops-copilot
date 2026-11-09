@@ -1,0 +1,20 @@
+{
+  "confirmed": true,
+  "confirmedAt": "2026-11-03",
+  "source": "기상청 지점정보 파일 (ASOS_관측지점정보.csv). weather/reference/asos_stations.csv 와 같은 자료",
+  "note": "파일럿 관측소. 서울 108 (Test 매장), 대구 143 (새소리 매장). 방법론 §13.3에 따라 파일럿 시작 전 고정.",
+  "stations": [
+    {
+      "id": "108",
+      "name": "서울",
+      "lat": 37.5714,
+      "lon": 126.9658
+    },
+    {
+      "id": "143",
+      "name": "대구",
+      "lat": 35.878,
+      "lon": 128.653
+    }
+  ]
+}

@@ -11,8 +11,9 @@ import { dirname, join } from 'path'
 import { daysBetween } from '../analysis/dates'
 import type { WeatherObs } from './types'
 import type { DailyWeather } from '../analysis/types'
+import { writableDataDir } from '../lib/dataPaths'
 
-export const DEFAULT_CACHE_DIR = join('data', 'weather_cache')
+export const DEFAULT_CACHE_DIR = writableDataDir('weather_cache')
 
 export interface CacheFile {
   stationId: string

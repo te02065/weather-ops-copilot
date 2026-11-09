@@ -36,7 +36,8 @@ yarn-error.log*
 
 # real sales files and reports (never commit - 설계 §8)
 data/
-
+# 설정 파일 (매장 목록, 관측소 목록; 키는 들어 있지 않음)
+!config/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
